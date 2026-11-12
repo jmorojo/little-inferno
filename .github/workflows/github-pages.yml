@@ -41,6 +41,13 @@ jobs:
             mkdir -p local
             gh release download game-data --repo "$GITHUB_REPOSITORY" --pattern littleinferno.zip --dir local
           fi
+      - name: Download pinned runtime release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p local
+          gh release download game-data --repo "$GITHUB_REPOSITORY" --pattern boxedwine-build-125.zip --dir local
+          gh release download game-data --repo "$GITHUB_REPOSITORY" --pattern boxedwine.zip --dir web-boxedwine
       - name: Build verified Pages package
         env:
           LITTLE_INFERNO_GAME_URL: ${{ secrets.LITTLE_INFERNO_GAME_URL }}
@@ -50,6 +57,7 @@ jobs:
       - name: Test launcher and browser isolation
         run: |
           npm test
+          npm run test:runtime-download
           npm run test:pages
       - name: Test original game and audio under a project path
         run: npm run test:game:pages -- --smooth --audio

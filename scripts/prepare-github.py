@@ -8,7 +8,7 @@ import subprocess
 import tarfile
 import tempfile
 
-from runtime_assets import ROOT, sha256
+from runtime_assets import ROOT, SOURCE, ARTIFACT_SHA, HASHES, ensure_runtime, runtime_artifact, sha256
 
 
 def prepare():
@@ -18,6 +18,8 @@ def prepare():
     game = ROOT / "local" / metadata["asset"]
     if not game.is_file() or game.stat().st_size != metadata["size"] or sha256(game) != metadata["sha256"]:
         raise ValueError("The local game ZIP does not match scripts/github-game.json.")
+    ensure_runtime()
+    vendor_archive = runtime_artifact()
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     archive = subprocess.check_output(["git", "archive", "--format=tar", commit], cwd=ROOT)
     destination = ROOT / "dist/github"
@@ -34,7 +36,10 @@ def prepare():
         releases.mkdir()
         shutil.copyfile(game, releases / metadata["asset"])
         (releases / "littleinferno.zip.sha256").write_text(f'{metadata["sha256"]}  {metadata["asset"]}\n')
-        (stage / "preparation.json").write_text(json.dumps({"sourceCommit": commit, "game": metadata}, indent=2) + "\n")
+        shutil.copyfile(vendor_archive, releases / "boxedwine-build-125.zip")
+        shutil.copyfile(SOURCE / "boxedwine.zip", releases / "boxedwine.zip")
+        (releases / "runtime.sha256").write_text(f'{ARTIFACT_SHA}  boxedwine-build-125.zip\n{HASHES["boxedwine.zip"]}  boxedwine.zip\n')
+        (stage / "preparation.json").write_text(json.dumps({"sourceCommit": commit, "game": metadata, "runtime": {"boxedwine-build-125.zip": ARTIFACT_SHA, "boxedwine.zip": HASHES["boxedwine.zip"]}}, indent=2) + "\n")
         if destination.exists():
             shutil.rmtree(destination)
         stage.replace(destination)

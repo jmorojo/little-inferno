@@ -93,7 +93,7 @@ npm run prepare:github
 Se generan:
 
 - `dist/github/source/`: código listo para iniciar el repositorio de GitHub con un historial nuevo.
-- `dist/github/release-assets/`: `littleinferno.zip` y su checksum, para la release de datos.
+- `dist/github/release-assets/`: ZIP del juego, archivo original de BoxedWine build 125, filesystem de Wine y sus checksums, para la release de datos.
 - `dist/github/preparation.json`: commit de origen y hashes de los datos.
 
 La exportación usa solo los archivos del commit y comprueba que no incluya enlaces simbólicos ni archivos grandes inesperados. No reescribe el historial de Gitea. La carpeta completa `dist/` sigue ignorada por Git; la subcarpeta `source/` se publica como un repositorio separado.
@@ -101,11 +101,13 @@ La exportación usa solo los archivos del commit y comprueba que no incluya enla
 ### Configuración inicial del repositorio de GitHub
 
 1. Subir `dist/github/source/` a la rama `main` del repositorio de destino.
-2. Crear una release publicada con el tag **`game-data`** y adjuntar los dos archivos de `dist/github/release-assets/`. El tag debe señalar un commit existente del repositorio.
+2. Crear una release publicada con el tag **`game-data`** y adjuntar todos los archivos de `dist/github/release-assets/`. El tag debe señalar un commit existente del repositorio.
 3. En **Settings → Pages → Build and deployment → Source**, elegir **GitHub Actions**.
 4. En **Actions → Deploy GitHub Pages → Run workflow**, ejecutar el workflow en `main`.
 
-El juego queda como un asset de release, fuera de Git. Los [assets de release admiten archivos de menos de 2 GiB](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas); el ZIP actual ocupa unos 320 MiB. `scripts/github-game.json` fija su tamaño y SHA-256. La compilación verifica el ZIP y reconstruye el paquete completo, por lo que el navegador descarga los fragmentos desde Pages y no depende de Netlify ni de la API de GitHub durante la partida.
+El juego y el motor quedan como assets de release, fuera de Git. Los [assets de release admiten archivos de menos de 2 GiB](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases#storage-and-bandwidth-quotas); el ZIP del juego ocupa unos 320 MiB. `scripts/github-game.json` fija su tamaño y SHA-256. La compilación verifica los archivos y reconstruye el paquete completo, por lo que el navegador descarga los fragmentos desde Pages y no depende de Netlify ni de la API de GitHub durante la partida.
+
+La release contiene `boxedwine-build-125.zip` y `boxedwine.zip` con los hashes originales del motor. El workflow los descarga antes del build para no depender de la retención de builds del servidor de BoxedWine. El setup local también usa esta copia como alternativa si la fuente original deja de estar disponible, y conserva el archivo de build en `local/boxedwine-build-125.zip`. Las sumas fijadas se verifican antes de instalar o aplicar el parche; una discrepancia de integridad detiene el proceso. `BOXEDWINE_RUNTIME_MIRROR` permite configurar otra URL base para esa copia.
 
 Como alternativa a la release puede definirse el secreto **`LITTLE_INFERNO_GAME_URL`** con una URL HTTPS al mismo ZIP. La URL se usa solo durante el build y no se incluye en la web. Para cambiar de versión del juego, actualiza sus datos de `scripts/github-game.json` junto con la release.
 
@@ -117,6 +119,7 @@ El workflow [`.github/workflows/github-pages.yml`](../.github/workflows/github-p
 
 ```sh
 npm test
+npm run test:runtime-download
 npm run test:pages
 npm run test:game:pages -- --smooth --audio
 ```

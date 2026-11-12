@@ -8,6 +8,8 @@ The runtime is based on **BoxedWine master build 125**, `Web/SingleThreadedJit`,
 - Upstream `boxedwine.wasm`: `251d50875af37e4a7b24c7acc4aaa92dc6df728184b91fccd817145ce8455d5e`
 - Shipped `boxedwine.wasm`: `b2f133be3a57bad25133114050c6f5d486ed86433bd3b97a0cd73ab8a983ac0c`
 
+The original build archive is also mirrored, without modification, as [`boxedwine-build-125.zip`](https://github.com/jmorojo/little-inferno/releases/download/game-data/boxedwine-build-125.zip). The original Wine filesystem is mirrored as [`boxedwine.zip`](https://github.com/jmorojo/little-inferno/releases/download/game-data/boxedwine.zip). These copies retain the pinned hashes and notices and let setup reproduce the runtime when the upstream build URL expires. The Pages workflow downloads these release assets before building. Local setup falls back to the mirror on a network error and rejects any checksum mismatch.
+
 ## Bounded return lookahead
 
 The WASM JIT stops its block search at a real x86 return once it has looked ahead at least 1,024 guest bytes. Conditional branches past that return use the existing side-exit path. This reduces large, overlapping translations and their compilation cost; it does not change guest instructions, floating-point precision, simulation speed or rendering resolution. It is a lookahead policy, not a hard maximum block size: a function without a return can still produce a larger block.
