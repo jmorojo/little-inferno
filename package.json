@@ -1,0 +1,24 @@
+{
+  "name": "little-inferno-web",
+  "private": true,
+  "scripts": {
+    "start": "python3 web-boxedwine/server.py",
+    "test": "node --test tests/launcher.test.cjs tests/deploy.test.cjs",
+    "test:game": "node tests/game-smoke.cjs",
+    "setup": "python3 scripts/fetch-runtime.py",
+    "build": "python3 scripts/build-site.py",
+    "build:pages": "python3 scripts/build-site.py --target github-pages",
+    "verify:pages": "python3 scripts/verify-deploy.py --target github-pages",
+    "preview:pages": "python3 web-boxedwine/server.py --directory dist/github-pages --port 8089 --base-path /little-inferno/ --no-isolation-headers",
+    "prepare:github": "python3 scripts/prepare-github.py",
+    "test:pages": "node --test tests/pages.test.cjs",
+    "test:game:pages": "node tests/game-smoke.cjs --pages",
+    "preview": "python3 web-boxedwine/server.py --directory dist/netlify",
+    "test:game:deploy": "node tests/game-smoke.cjs --deploy",
+    "benchmark:game": "node scripts/benchmark-game.cjs",
+    "verify:deploy": "python3 scripts/verify-deploy.py"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}

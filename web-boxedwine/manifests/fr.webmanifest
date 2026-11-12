@@ -1,0 +1,20 @@
+{
+  "id": "../",
+  "name": "Little Inferno",
+  "short_name": "Little Inferno",
+  "description": "Little Inferno dans votre navigateur. Allumez votre petite cheminée.",
+  "lang": "fr",
+  "start_url": "../?lang=fr",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#171411",
+  "theme_color": "#171411",
+  "icons": [
+    {
+      "src": "../assets/flame.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

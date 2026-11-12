@@ -1,0 +1,78 @@
+diff --git a/source/emulation/cpu/jit/jitCodeGen.cpp b/source/emulation/cpu/jit/jitCodeGen.cpp
+index 3655aaf..a9704a9 100644
+--- a/source/emulation/cpu/jit/jitCodeGen.cpp
++++ b/source/emulation/cpu/jit/jitCodeGen.cpp
+@@ -362,7 +362,14 @@ bool JitCodeGen::calculateLongestBlock(DecodedOp* op) {
+         // could be ret, call, int.  Basically this is an instruction where we are not guaranteed to see a next instruction
+         if (nextOp->isBranch() && !nextOp->isDirectJumpBranch()) {
+             // Stop on a ret unless a known direct branch reaches code after it.
++            // Bound WASM lookahead at a real return. Large functions with early
++            // returns otherwise compile many overlapping interiors on demand.
++            // Conditional side exits preserve branches past this return.
++#ifdef BOXEDWINE_WASM_JIT
++            if (nextOp->isRet() && (furthestJump < eip + nextOp->len || eip - this->startingEip >= 1024)) {
++#else
+             if (nextOp->isRet() && furthestJump < eip + nextOp->len) {
++#endif
+                 hasTerminalRet = true;
+                 terminalRetEip = eip;
+                 eip += nextOp->len;
+diff --git a/source/test/cpu/testWasmJitConditions.cpp b/source/test/cpu/testWasmJitConditions.cpp
+index b1efe13..27d8675 100644
+--- a/source/test/cpu/testWasmJitConditions.cpp
++++ b/source/test/cpu/testWasmJitConditions.cpp
+@@ -946,7 +946,54 @@ static void testWasmForwardRegionState() {
+ }
+ 
+ 
++// A large function can branch over an early return. Ending lookahead at
++// that return must preserve both paths, flags, registers and the x87 stack.
++static void testWasmJitBoundedReturnLookahead() {
++    for (bool skipReturn : {false, true}) {
++        testNewInstruction(DF);
++        auto& context = testContext();
++        CPU* cpu = context.cpu;
++        cpu->fpu.FINIT();
++        cpu->reg[3].u32 = skipReturn ? 0 : 1;
++        testPushCode8(0x68);
++        U32 returnAddress = context.codeIp;
++        testPushCode32(0);
++        emitMov(0, 0x12345678);
++        testPushCode8(0xd9); testPushCode8(0xe8); // fld1
++        for (U32 i = 0; i < 560; ++i) { testPushCode8(0x66); testPushCode8(0x90); }
++        testPushCode8(0x85); testPushCode8(0xdb); // test ebx,ebx
++        testPushCode8(0x74); testPushCode8(1); // jz past the early return
++        U32 earlyReturn = context.codeIp;
++        testPushCode8(0xc3);
++        U32 continuation = context.codeIp;
++        testPushCode8(0xd9); testPushCode8(0xe8); // fld1
++        testPushCode8(0xde); testPushCode8(0xc1); // faddp st1,st0
++        emitMov(0, 0x89abcdef);
++        testPushCode8(0xc3);
++        context.memory->writed(returnAddress, context.codeIp - TEST_CODE_ADDRESS);
++        testPushCode8(0xdd); testPushCode8(0x1d); testPushCode32(16); // fstp qword [16]
++        testPushCode8(0x9c); testPushCode8(0x5d); // pushfd; pop ebp
++        auto* entry = cpu->getOp(TEST_CODE_ADDRESS, 0);
++        startNewJIT(cpu, TEST_CODE_ADDRESS, entry);
++        if (!entry->pfnJitCode || entry->blockLen != earlyReturn + 1 - TEST_CODE_ADDRESS)
++            testFail("WASM large return lookahead did not stop at its early return");
++        testRunCPU();
++        U64 expected = skipReturn ? 0x4000000000000000ull : 0x3ff0000000000000ull;
++        U32 flags = DF | (skipReturn ? ZF | PF : 0);
++        if (cpu->reg[0].u32 != (skipReturn ? 0x89abcdefu : 0x12345678u) ||
++                cpu->reg[4].u32 != 4096 || context.memory->readq(TEST_HEAP_ADDRESS + 16) != expected ||
++                ((cpu->reg[5].u32 ^ flags) & (CF | PF | ZF | SF | OF | DF)))
++            testFail("WASM bounded return lookahead lost state (skip %u)", skipReturn);
++        if (skipReturn) {
++            auto* target = context.memory->getDecodedOp(continuation);
++            if (!target || !target->pfnJitCode)
++                testFail("WASM bounded return continuation was not independently compiled");
++        }
++    }
++}
++
+ void testWasmJitForwardBranches() {
++    testWasmJitBoundedReturnLookahead();
+     testWasmReadGroups();
+     testWasmForwardRegionState();
+     auto patch = [](U32 displacement, U32 target) {

@@ -1,0 +1,148 @@
+{
+  "date": "2026-11-11",
+  "runtime": "BoxedWine master build 125 SingleThreadedJit / Wine 11 WebGL v27",
+  "upstreamWasmSha256": "251d50875af37e4a7b24c7acc4aaa92dc6df728184b91fccd817145ce8455d5e",
+  "patchedWasmSha256": "b2f133be3a57bad25133114050c6f5d486ed86433bd3b97a0cd73ab8a983ac0c",
+  "host": "Linux x86_64, four vCPU, headless Chromium, SwiftShader software renderer",
+  "limits": "One paired release-binary comparison plus one independent rebuilt candidate run. Relative measurements only; no prediction of Mac or hardware GPU frame rates. Fresh browser/profile per run, 1280x900 viewport, same 851x479 game resolution and input sequence. CPU is renderer ThreadTime/frame and excludes GPU-process CPU. Some compilation spikes remain.",
+  "warmupFrames": 80,
+  "input": "Flame held at canvas .2,.7 during warmup and flame stages, then moved while held to .65,.62 to ignite the tutorial object.",
+  "results": [
+    {
+      "stage": "flame1",
+      "upstream": {
+        "frames": 80,
+        "cpuMsPerFrame": 97.06375000000006,
+        "medianMs": 231.99500000476837,
+        "p95Ms": 274.07499999552965,
+        "maxMs": 295.4750000014901,
+        "wasm": {
+          "Module": {
+            "calls": 43,
+            "total": 10.245000004768372,
+            "max": 0.9550000056624413
+          },
+          "Instance": {
+            "calls": 43,
+            "total": 1.5549999922513962,
+            "max": 0.08000000566244125
+          }
+        }
+      },
+      "boundedLookahead": {
+        "frames": 80,
+        "cpuMsPerFrame": 79.99885000000013,
+        "medianMs": 199.74000000208616,
+        "p95Ms": 222.9100000038743,
+        "maxMs": 239.0300000011921,
+        "wasm": {
+          "Module": {
+            "calls": 45,
+            "total": 10.134999997913837,
+            "max": 0.9549999982118607
+          },
+          "Instance": {
+            "calls": 45,
+            "total": 1.4699999764561653,
+            "max": 0.07999999821186066
+          }
+        }
+      }
+    },
+    {
+      "stage": "flame2",
+      "upstream": {
+        "frames": 80,
+        "cpuMsPerFrame": 134.84669999999994,
+        "medianMs": 228.7850000038743,
+        "p95Ms": 290.9750000014901,
+        "maxMs": 2273.310000002384,
+        "wasm": {
+          "Module": {
+            "calls": 866,
+            "total": 800.2249999642372,
+            "max": 5.079999998211861
+          },
+          "Instance": {
+            "calls": 866,
+            "total": 31.56000015884638,
+            "max": 0.20499999821186066
+          }
+        }
+      },
+      "boundedLookahead": {
+        "frames": 80,
+        "cpuMsPerFrame": 114.30423750000003,
+        "medianMs": 201.4399999976158,
+        "p95Ms": 252.85500000417233,
+        "maxMs": 2075.219999998808,
+        "wasm": {
+          "Module": {
+            "calls": 875,
+            "total": 704.1400001272559,
+            "max": 4.530000001192093
+          },
+          "Instance": {
+            "calls": 875,
+            "total": 24.70499985665083,
+            "max": 0.10500000417232513
+          }
+        }
+      }
+    },
+    {
+      "stage": "burn",
+      "upstream": {
+        "frames": 60,
+        "cpuMsPerFrame": 114.35171666666666,
+        "medianMs": 250.49500000476837,
+        "p95Ms": 320.2749999985099,
+        "maxMs": 431.8099999949336,
+        "wasm": {
+          "Module": {
+            "calls": 226,
+            "total": 68.52500002086163,
+            "max": 1.0950000062584877
+          },
+          "Instance": {
+            "calls": 226,
+            "total": 7.715000011026859,
+            "max": 0.2800000011920929
+          }
+        }
+      },
+      "boundedLookahead": {
+        "frames": 60,
+        "cpuMsPerFrame": 94.02688333333344,
+        "medianMs": 215.67499999701977,
+        "p95Ms": 262.0300000011921,
+        "maxMs": 315.52000000327826,
+        "wasm": {
+          "Module": {
+            "calls": 188,
+            "total": 51.25999999791384,
+            "max": 1.094999998807907
+          },
+          "Instance": {
+            "calls": 188,
+            "total": 4.810000024735928,
+            "max": 0.08500000089406967
+          }
+        }
+      }
+    }
+  ],
+  "percentileMethod": "Lower rank floor((N-1)*q) over consecutive presentation intervals.",
+  "validation": {
+    "webTests": 20,
+    "boxedwineCpuTestGroups": 921,
+    "boxedwineCpuCommand": "node Build/TestJit/boxedwine.js -fast",
+    "boxedwineCpuSeconds": 255,
+    "gameIntegration": "npm run test:game:deploy -- --smooth --perf --audio",
+    "gameIntegrationResult": "Original game rendered, click advanced a scene, real audio mute survived engine resume and volume adjustment passed.",
+    "negativeControl": "The new bounded-return regression fails against the original lookahead predicate and passes with the source patch.",
+    "benchmarkCommand": "npm run benchmark:game -- --name validation",
+    "benchmarkResult": "Completed all three scenes with no browser errors. Functional validation ran alongside CPU tests; its timings are excluded from the paired comparison."
+  },
+  "browser": "Chromium 153.0.8010.12"
+}

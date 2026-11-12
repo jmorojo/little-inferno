@@ -1,0 +1,23 @@
+# Local configuration and credentials
+.codex/
+.agents/
+.env
+.env.*
+!.env.example
+.netlify/
+
+# Dependencies, caches and generated output
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+test-results/
+dist/
+
+# Local game, downloaded runtime and preserved historical research
+local/
+archive/
+web-boxedwine/boxedwine.js
+web-boxedwine/boxedwine.wasm
+web-boxedwine/boxedwine.zip
+web-boxedwine/littleinferno.zip

@@ -1,0 +1,20 @@
+{
+  "id": "../",
+  "name": "Little Inferno",
+  "short_name": "Little Inferno",
+  "description": "Little Inferno im Browser. Entzünde ein Feuer in deinem kleinen Kamin.",
+  "lang": "de",
+  "start_url": "../?lang=de",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#171411",
+  "theme_color": "#171411",
+  "icons": [
+    {
+      "src": "../assets/flame.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

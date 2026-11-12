@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#171411" />
+    <meta
+      name="description"
+      data-i18n-content="description"
+      content="Little Inferno en tu navegador. Enciende tu pequeña chimenea."
+    />
+    <title data-i18n="title">Little Inferno · Jugar</title>
+    <link rel="icon" href="assets/flame.svg" type="image/svg+xml" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="player.css" />
+    <script src="i18n.js" defer></script>
+    <script src="audio.js" defer></script>
+    <script src="player.js" defer></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="site-header">
+        <a
+          class="brand"
+          href="./"
+          aria-label="Little Inferno, inicio"
+          data-i18n-aria-label="home"
+          ><img src="assets/flame.svg" width="28" height="32" alt="" /><span
+            >Little Inferno</span
+          ></a
+        >
+        <div class="header-actions">
+          <label class="language-control"
+            ><span class="visually-hidden" data-i18n="language"
+              >Idioma de la interfaz</span
+            ><select
+              id="language-select"
+              aria-label="Idioma de la interfaz"
+              data-i18n-aria-label="language"
+            >
+              <option value="en" lang="en">English</option>
+              <option value="es" lang="es">Español</option>
+              <option value="de" lang="de">Deutsch</option>
+              <option value="fr" lang="fr">Français</option>
+            </select></label
+          >
+          <button
+            class="quiet"
+            id="help-button"
+            aria-expanded="false"
+            aria-controls="help"
+          >
+            <span data-i18n="howToPlay">Cómo jugar</span>
+            <span aria-hidden="true">?</span>
+          </button>
+        </div>
+      </header>
+      <main>
+        <section class="intro" aria-labelledby="page-title">
+          <p class="eyebrow" data-i18n="welcome">BIENVENIDO A TU CHIMENEA</p>
+          <h1 id="page-title" data-i18n="headline">Hace frío ahí fuera.</h1>
+          <p data-i18n="intro">Quédate un rato. Enciende algo.</p>
+        </section>
+        <section class="player" aria-label="Little Inferno">
+          <div class="screen" id="game-screen">
+            <canvas
+              id="canvas"
+              width="800"
+              height="600"
+              tabindex="0"
+              aria-label="Pantalla del juego"
+              data-i18n-aria-label="canvas"
+            ></canvas>
+            <canvas
+              id="boxedwine-webgl-canvas-0"
+              width="800"
+              height="600"
+              aria-hidden="true"
+            ></canvas>
+            <div class="curtain" id="curtain">
+              <div class="hearth" aria-hidden="true">
+                <div class="fire"><i></i><i></i><i></i></div>
+                <div class="logs"></div>
+              </div>
+              <div class="launch-content">
+                <p class="screen-kicker">LITTLE INFERNO</p>
+                <h2 id="launch-title" data-i18n="spark">
+                  Todo empieza con una chispa.
+                </h2>
+                <label class="quality-control" for="quality-select">
+                  <span data-i18n="graphics">Gráficos</span>
+                  <select id="quality-select" aria-describedby="quality-hint">
+                    <option value="standard" data-i18n="qualityStandard">Estándar</option>
+                    <option value="smooth" data-i18n="qualitySmooth">Más fluidez</option>
+                  </select>
+                </label>
+                <p id="quality-hint" class="quality-hint" data-i18n="qualityHint">
+                  Más fluidez reduce la resolución y conserva las físicas.
+                </p>
+                <button class="play-button" id="play-button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m9 5 11 7-11 7z" /></svg
+                  ><span data-i18n="start">Encender la chimenea</span>
+                </button>
+                <p
+                  id="status"
+                  role="status"
+                  aria-live="polite"
+                  data-i18n="firstLoad"
+                >
+                  La primera carga puede tardar unos minutos.
+                </p>
+                <progress
+                  id="progress"
+                  max="100"
+                  value="0"
+                  aria-label="Descarga del juego"
+                  data-i18n-aria-label="download"
+                  hidden
+                ></progress>
+                <div class="error-actions" id="error-actions" hidden>
+                  <button class="quiet" id="retry-button" data-i18n="retry">
+                    Volver a intentar</button
+                  ><button class="quiet" id="error-details" data-i18n="details">
+                    Ver detalles
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="player-bar">
+            <span class="session-status" id="session-status"
+              ><i aria-hidden="true"></i
+              ><span id="session-label" data-i18n="phaseIdle"
+                >Listo para encender</span
+              ></span
+            >
+            <div class="player-controls">
+              <button
+                class="icon-button"
+                id="sound-button"
+                aria-label="Silenciar sonido"
+                data-i18n-aria-label="mute"
+                aria-pressed="false"
+                title="Silenciar sonido"
+                data-i18n-title="mute"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M11 5 6 9H3v6h3l5 4zM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"
+                  /></svg
+                ><span data-i18n="sound">Sonido</span>
+              </button>
+              <div class="volume-control">
+                <button
+                  type="button"
+                  class="volume-knob"
+                  id="volume-knob"
+                  role="slider"
+                  aria-label="Volumen"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="100"
+                  data-i18n-aria-label="volume"
+                ></button>
+                <output id="volume-value" for="volume-knob" aria-hidden="true">100%</output>
+              </div>
+              <span class="control-divider"></span>
+              <button
+                class="icon-button"
+                id="fullscreen-button"
+                aria-label="Pantalla completa"
+                data-i18n-aria-label="fullscreen"
+                title="Pantalla completa"
+                data-i18n-title="fullscreen"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" /></svg
+                ><span data-i18n="fullscreen">Pantalla completa</span>
+              </button>
+            </div>
+          </div>
+        </section>
+        <div class="below-player">
+          <p>
+            <span aria-hidden="true">↖</span>
+            <span data-i18n="hint"
+              >Haz clic en el juego para continuar. Arrastra objetos y mantén
+              pulsado para hacer fuego.</span
+            >
+          </p>
+        </div>
+        <section
+          id="help"
+          class="help"
+          hidden
+          aria-label="Cómo jugar"
+          data-i18n-aria-label="howToPlay"
+        >
+          <h2 data-i18n="helpTitle">Un pequeño refugio, un gran fuego.</h2>
+          <p data-i18n="helpBody">
+            Usa el ratón para mover los objetos. Mantén pulsado en la chimenea
+            para encender el fuego. Compra más objetos en el catálogo y descubre
+            combinaciones.
+          </p>
+          <p data-i18n="helpBrowser">
+            Pulsa Esc para salir de pantalla completa. El juego original
+            necesita un navegador de escritorio con WebGL 2. La compatibilidad
+            en esta versión es experimental.
+          </p>
+          <p data-i18n="helpLanguage">
+            Este selector cambia el idioma de la web. Cambia el idioma del juego
+            desde su propio menú principal.
+          </p>
+          <p id="save-status" data-i18n="saveDefault">
+            Las partidas se guardan en este navegador cuando el almacenamiento
+            está disponible.
+          </p>
+          <p data-i18n="helpGpu">
+            Se solicita la gráfica de alto rendimiento. Si sigue usando la integrada,
+            selecciona alto rendimiento para el navegador en los ajustes gráficos del
+            sistema y reinicia el navegador. Puedes consultar la gráfica utilizada
+            en los detalles técnicos.
+          </p>
+        </section>
+        <details class="diagnostics" id="diagnostics">
+          <summary data-i18n="technical">Detalles técnicos</summary>
+          <p id="diagnostic-status" data-i18n="idleDetail">
+            El juego se descargará cuando pulses el botón de inicio.
+          </p>
+          <p id="graphics-device" hidden></p>
+          <textarea
+            id="output"
+            readonly
+            aria-label="Registro del juego"
+            data-i18n-aria-label="log"
+            spellcheck="false"
+          ></textarea
+          ><button class="quiet" id="download-log" data-i18n="downloadLog">
+            Descargar registro
+          </button>
+        </details>
+      </main>
+      <footer>
+        <span
+          >Little Inferno
+          <span class="copyright">© Tomorrow Corporation</span></span
+        >
+      </footer>
+    </div>
+    <noscript
+      >Enable JavaScript to play. / Activa JavaScript para jugar. / Aktiviere
+      JavaScript zum Spielen. / Activez JavaScript pour jouer.</noscript
+    >
+  </body>
+</html>
